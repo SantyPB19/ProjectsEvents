@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Next.js build
+.next/
+out/
+
+# Production
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env*
+.env*.local
+
+# Vercel
+.vercel/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# v0 / sandbox
+.v0-trash/
+.snowflake/
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+
+# Misc
+next.user-config.*
+.npmrc
