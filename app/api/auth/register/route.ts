@@ -1,47 +1,71 @@
-import { NextRequest, NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const adapter = new PrismaPg({ 
-  connectionString: "postgresql://postgres:123456@localhost:5432/loginregister_db"
-})
-const db = new PrismaClient({ adapter })
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+const db =
+  globalForPrisma.prisma ??
+  new PrismaClient({ adapter });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = db;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json()
+    const { name, email, password } = await req.json();
 
+    // Validaciones básicas
     if (!name || !email || !password) {
       return NextResponse.json(
-        { message: 'Todos los campos son obligatorios' },
+        { message: "Todos los campos son obligatorios" },
         { status: 400 }
-      )
+      );
     }
 
-    const existingUser = await db.user.findUnique({ where: { email } })
+    if (password.length < 8) {
+      return NextResponse.json(
+        { message: "La contraseña debe tener mínimo 8 caracteres" },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await db.user.findUnique({
+      where: { email },
+    });
+
     if (existingUser) {
       return NextResponse.json(
-        { message: 'El correo ya está registrado' },
+        { message: "El correo ya está registrado" },
         { status: 409 }
-      )
+      );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.user.create({
       data: { name, email, password: hashedPassword },
-    })
+    });
 
     return NextResponse.json(
-      { message: 'Usuario registrado exitosamente' },
+      { message: "Usuario registrado exitosamente" },
       { status: 201 }
-    )
-  } catch (error) {
-    console.error('Error en registro:', error)
+    );
+
+  } catch (error: unknown) {
+    console.error("Error en registro:", error);
+
     return NextResponse.json(
-      { message: 'Error interno del servidor' },
+      { message: "Error interno del servidor" },
       { status: 500 }
-    )
+    );
   }
 }

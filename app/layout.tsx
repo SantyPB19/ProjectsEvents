@@ -3,7 +3,7 @@ import { Nunito, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
-// ✅ Fuentes bien configuradas
+// Fuentes
 const nunito = Nunito({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   variable: "--font-mono",
 });
 
-// ✅ Metadata organizada
+// Metadata
 export const metadata: Metadata = {
   title: "Sistema de Autenticación",
   description: "Login con roles y dashboards personalizados",
@@ -38,12 +38,10 @@ export const metadata: Metadata = {
   },
 };
 
-// ✅ Layout limpio + estilos base claros
+// ✅ FIX SONARQUBE
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
       <body

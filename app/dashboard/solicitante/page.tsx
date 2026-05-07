@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import Layout from "@/components/dashboard/layout";
 
@@ -7,17 +6,20 @@ export default function SolicitanteDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+
   const [solicitudes, setSolicitudes] = useState([
-    "Solicitud 1 - Pendiente",
-    "Solicitud 2 - Aprobada",
+    { id: 1, texto: "Solicitud 1 - Pendiente" },
+    { id: 2, texto: "Solicitud 2 - Aprobada" },
   ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!nombre) return;
 
-    const nueva = `${nombre} - Pendiente`;
+    const nueva = {
+      id: Date.now(), // ✅ UID
+      texto: `${nombre} - Pendiente`,
+    };
 
     setSolicitudes([...solicitudes, nueva]);
 
@@ -30,7 +32,6 @@ export default function SolicitanteDashboard() {
     <Layout>
       <h1 className="text-3xl font-bold mb-6">Mis solicitudes</h1>
 
-      {/* BOTÓN FUNCIONAL */}
       <button
         onClick={() => setShowForm(!showForm)}
         className="bg-pink-400 hover:bg-pink-500 text-white px-4 py-2 rounded-lg mb-4"
@@ -38,7 +39,6 @@ export default function SolicitanteDashboard() {
         + Nueva solicitud
       </button>
 
-      {/* FORMULARIO */}
       {showForm && (
         <form
           onSubmit={handleSubmit}
@@ -65,11 +65,10 @@ export default function SolicitanteDashboard() {
         </form>
       )}
 
-      {/* LISTA */}
       <div className="bg-white p-4 rounded-xl shadow-sm border">
         <ul>
-          {solicitudes.map((s, i) => (
-            <li key={i}>{s}</li>
+          {solicitudes.map((s) => (
+            <li key={s.id}>{s.texto}</li>
           ))}
         </ul>
       </div>

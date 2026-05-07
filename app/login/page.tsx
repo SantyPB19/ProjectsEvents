@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,21 +12,26 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [serverMessage, setServerMessage] = useState<{
     text: string;
     type: "success" | "error";
   } | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const emailError = validateEmail(email);
+
   const passwordError =
     password.length > 0 && password.length < 8
       ? "Mínimo 8 caracteres"
       : "";
+
   const hasErrors = !!emailError || !!passwordError || !email || !password;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (hasErrors) return;
 
     setIsLoading(true);
@@ -44,8 +47,6 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        
-
         setServerMessage({
           text: "¡Bienvenido! Iniciando sesión...",
           type: "success",
@@ -53,7 +54,6 @@ export default function LoginPage() {
 
         const role = data.user?.role;
 
-        // Redirección por rol
         setTimeout(() => {
           if (role === "admin") {
             router.push("/dashboard/admin");
@@ -65,17 +65,24 @@ export default function LoginPage() {
             router.push("/login");
           }
         }, 1500);
+
       } else {
         setServerMessage({
           text: data.message || "Credenciales incorrectas",
           type: "error",
         });
       }
-    } catch (error) {
+
+    } catch (error: unknown) {
+
+      // ✅ FIX SONARQUBE
+      console.error("Error en login:", error);
+
       setServerMessage({
         text: "No se pudo conectar con el servidor. Intenta más tarde.",
         type: "error",
       });
+
     } finally {
       setIsLoading(false);
     }
@@ -99,6 +106,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               error={email ? emailError : ""}
             />
+
             <AuthFormInput
               id="password"
               label="Contraseña"
@@ -145,6 +153,7 @@ export default function LoginPage() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
+
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
                 ¿No tienes cuenta?
