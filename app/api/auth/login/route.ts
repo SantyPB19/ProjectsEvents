@@ -5,87 +5,90 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    // Lista de usuarios (simulación BD)
-    const users = [
+    const usuarios = [
       {
         id: 1,
-        name: "Admin",
+        nombre: "Admin",
         email: "admin@test.com",
         password: "12345678",
         role: "admin",
       },
       {
         id: 2,
-        name: "Colaborador",
+        nombre: "Colaborador",
         email: "colab@test.com",
         password: "12345678",
         role: "colaborador",
       },
       {
         id: 3,
-        name: "Solicitante",
+        nombre: "Solicitante",
         email: "soli@test.com",
         password: "12345678",
         role: "solicitante",
       },
     ];
 
-    // Buscar usuario correcto
-    const user = users.find(
+    const usuario = usuarios.find(
       (u) => u.email === email && u.password === password
     );
 
-    // Si no existe
-    if (!user) {
+    if (!usuario) {
       return NextResponse.json(
-        { message: "Credenciales incorrectas" },
+        { mensaje: "Credenciales incorrectas" },
         { status: 401 }
       );
     }
 
-    // Token 
-    const SECRET = "mi_secreto_prueba_123";
+    const SECRET = process.env.JWT_SECRET;
+
+    if (!SECRET) {
+      throw new Error("JWT_SECRET no está definido");
+    }
 
     const token = jwt.sign(
       {
-        id: user.id,
-        email: user.email,
-        role: user.role,
+        id: usuario.id,
+        email: usuario.email,
+        role: usuario.role,
       },
       SECRET,
       { expiresIn: "7d" }
     );
 
-    // Respuesta
     const response = NextResponse.json({
-      message: "Login exitoso",
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+      mensaje: "Login exitoso",
+      usuario: {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        role: usuario.role,
       },
     });
 
-    // Cookies
     response.cookies.set("token", token, {
       httpOnly: true,
       path: "/",
     });
 
-   response.cookies.set("role", user.role, {
-  httpOnly: false,
-  path: "/",
-});
+    response.cookies.set("role", usuario.role, {
+      httpOnly: false,
+      path: "/",
+    });
 
     return response;
 
-  } catch (error) {
-    console.error("Error en login:", error);
+  } catch (error: unknown) {
+
+    console.error("Error durante el login:", error);
 
     return NextResponse.json(
-      { message: "Error interno del servidor" },
-      { status: 500 }
+      {
+        mensaje: "Error interno del servidor",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
