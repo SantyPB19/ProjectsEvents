@@ -12,10 +12,11 @@ export default function FormInput({
   value,
   onChange,
   error,
-}: Props) {
+}: Readonly<Props>) {
   return (
     <div style={{ marginBottom: "15px" }}>
       <label>{label}</label>
+
       <input
         type={type}
         value={value}
@@ -28,6 +29,7 @@ export default function FormInput({
           borderRadius: "5px",
         }}
       />
+
       {error && (
         <span style={{ color: "red", fontSize: "12px" }}>
           {error}

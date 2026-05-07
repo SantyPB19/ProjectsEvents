@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { menuByRole } from "./menu";
 import Link from "next/link";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+
   const router = useRouter();
   const [role, setRole] = useState("");
 
@@ -36,18 +39,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-[#fdf6f9]">
-      
+
       {/* SIDEBAR */}
       <aside className="w-64 bg-[#ffe4ec] p-5 flex flex-col justify-between shadow-md">
-        
+
         <div>
           <h2 className="text-xl font-bold mb-6">{roleName}</h2>
 
-          {/* 🔥 MENÚ DINÁMICO */}
+          {/* MENÚ */}
           <nav className="flex flex-col gap-2">
-            {menu.map((item, index) => (
+            {menu.map((item) => (
               <Link
-                key={index}
+                key={item.path} // ✅ FIX (usar id único)
                 href={item.path}
                 className="p-2 rounded-lg hover:bg-pink-200 transition"
               >

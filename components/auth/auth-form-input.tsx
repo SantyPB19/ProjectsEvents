@@ -6,39 +6,28 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/lib/auth";
 
-interface AuthFormInputProps {
-  id: string;
-  label: string;
-  type?: string;
-  placeholder?: string;
-  required?: boolean;
-  autoComplete?: string;
-
-  // 🔥 NUEVO
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error?: string;
-}
+// =============================
+// LOGIN FORM
+// =============================
 export default function LoginForm() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError("");
     setLoading(true);
 
     try {
       const data = await loginUser(email, password);
 
-      // Guarda el token (ajusta según tu estrategia)
       localStorage.setItem("token", data.token);
 
-      // Redirige según el rol
       const role = data.user?.role;
 
       if (role === "admin") {
@@ -46,11 +35,16 @@ export default function LoginForm() {
       } else if (role === "user") {
         router.push("/dashboard/user");
       } else {
-        router.push("/dashboard"); // fallback
+        router.push("/dashboard");
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
+
+      // ✅ SOLUCIÓN SONARQUBE
+      console.error("Error en login:", err);
+
       setError("Credenciales inválidas");
+
     } finally {
       setLoading(false);
     }
@@ -65,6 +59,7 @@ export default function LoginForm() {
         onChange={(e) => setEmail(e.target.value)}
         required
       />
+
       <input
         type="password"
         placeholder="Contraseña"
@@ -82,7 +77,21 @@ export default function LoginForm() {
   );
 }
 
-// Campo de formulario reutilizable para autenticacion
+// =============================
+// INPUT REUTILIZABLE
+// =============================
+interface AuthFormInputProps {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  autoComplete?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
+}
+
 export function AuthFormInput({
   id,
   label,
@@ -93,7 +102,7 @@ export function AuthFormInput({
   value,
   onChange,
   error,
-}: AuthFormInputProps) {
+}: Readonly<AuthFormInputProps>) {
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
@@ -107,10 +116,11 @@ export function AuthFormInput({
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
-        className={`h-11 ${error ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+        className={`h-11 ${
+          error ? "border-red-500 focus-visible:ring-red-500" : ""
+        }`}
       />
 
-      {/* 🔴 MENSAJE DE ERROR */}
       {error && (
         <p className="text-sm text-red-500 mt-1">
           {error}
