@@ -1,17 +1,22 @@
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-import * as dotenv from 'dotenv'
+import { PrismaClient } from "@prisma/client"
+import { PrismaPg } from "@prisma/adapter-pg"
 
-dotenv.config()
+const connectionString = process.env.DATABASE_URL!
 
-const adapter = new PrismaPg({ 
-  connectionString: "postgresql://postgres:123456@localhost:5432/loginregister_db"
+const adapter = new PrismaPg({
+  connectionString,
 })
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-export const db = globalForPrisma.prisma ?? new PrismaClient({ adapter })
+export const db =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    adapter,
+  })
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = db
+}
