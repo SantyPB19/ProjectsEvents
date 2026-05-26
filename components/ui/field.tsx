@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -84,6 +85,7 @@ function Field({
 }: React.ComponentProps<'div'> & VariantProps<typeof fieldVariants>) {
   return (
     <div
+      role="group"
       data-slot="field"
       data-orientation={orientation}
       className={cn(fieldVariants({ orientation }), className)}
@@ -155,7 +157,9 @@ function FieldSeparator({
   children,
   className,
   ...props
-}: React.ComponentProps<'div'> & { children?: React.ReactNode }) {
+}: React.ComponentProps<'div'> & {
+  children?: React.ReactNode
+}) {
   return (
     <div
       data-slot="field-separator"
@@ -188,8 +192,13 @@ function FieldError({
   errors?: Array<{ message?: string } | undefined>
 }) {
   const content = useMemo(() => {
-    if (children) return children
-    if (!errors) return null
+    if (children) {
+      return children
+    }
+
+    if (!errors) {
+      return null
+    }
 
     if (errors.length === 1 && errors[0]?.message) {
       return errors[0].message
@@ -197,16 +206,17 @@ function FieldError({
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
-        {errors.map((error, idx) =>
-          error?.message ? (
-            <li key={error.message + idx}>{error.message}</li>
-          ) : null,
+        {errors.map(
+          (error, index) =>
+            error?.message && <li key={index}>{error.message}</li>,
         )}
       </ul>
     )
   }, [children, errors])
 
-  if (!content) return null
+  if (!content) {
+    return null
+  }
 
   return (
     <div
