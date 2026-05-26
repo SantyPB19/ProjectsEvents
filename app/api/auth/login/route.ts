@@ -1,94 +1,83 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { db } from "@/lib/db";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
-    const usuarios = [
-      {
-        id: 1,
-        nombre: "Admin",
-        email: "admin@test.com",
-        password: "12345678",
-        role: "admin",
-      },
-      {
-        id: 2,
-        nombre: "Colaborador",
-        email: "colab@test.com",
-        password: "12345678",
-        role: "colaborador",
-      },
-      {
-        id: 3,
-        nombre: "Solicitante",
-        email: "soli@test.com",
-        password: "12345678",
-        role: "solicitante",
-      },
-    ];
-
-    const usuario = usuarios.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (!usuario) {
+    // Validación
+    if (!email || !password) {
       return NextResponse.json(
-        { mensaje: "Credenciales incorrectas" },
+        { message: "Correo y contraseña son obligatorios" },
+        { status: 400 }
+      );
+    }
+
+    // Buscar usuario
+    const user = await db.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { message: "Credenciales incorrectas" },
         { status: 401 }
       );
     }
 
-    const SECRET = process.env.JWT_SECRET;
+    // Verificar contraseña
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
-    if (!SECRET) {
-      throw new Error("JWT_SECRET no está definido");
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { message: "Credenciales incorrectas" },
+        { status: 401 }
+      );
     }
 
+    // Generar JWT
     const token = jwt.sign(
       {
-        id: usuario.id,
-        email: usuario.email,
-        role: usuario.role,
+        id: user.id,
+        email: user.email,
+        role: user.role,
       },
-      SECRET,
+      process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
-    const response = NextResponse.json({
-      mensaje: "Login exitoso",
-      usuario: {
-        id: usuario.id,
-        nombre: usuario.nombre,
-        email: usuario.email,
-        role: usuario.role,
+    // Respuesta + cookie
+    const response = NextResponse.json(
+      {
+        message: "Login exitoso",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       },
-    });
+      { status: 200 }
+    );
 
     response.cookies.set("token", token, {
       httpOnly: true,
-      path: "/",
-    });
-
-    response.cookies.set("role", usuario.role, {
-      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 
     return response;
 
-  } catch (error: unknown) {
-
-    console.error("Error durante el login:", error);
+  } catch (error) {
+    console.error("Error en login:", error);
 
     return NextResponse.json(
-      {
-        mensaje: "Error interno del servidor",
-      },
-      {
-        status: 500,
-      }
+      { message: "Error interno del servidor" },
+      { status: 500 }
     );
   }
 }

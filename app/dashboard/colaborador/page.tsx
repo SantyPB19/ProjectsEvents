@@ -1,16 +1,22 @@
-import Layout from "@/components/dashboard/layout";
+"use client";
 
 export default function ColaboradorDashboard() {
-  return (
-    <Layout>
-      <h1 className="text-3xl font-bold mb-6">Proyectos asignados</h1>
+  const proyectos = [
+    "Proyecto X",
+    "Proyecto Y",
+  ];
 
-      <div className="bg-white p-4 rounded shadow">
-        <ul>
-          <li>Proyecto X - En progreso</li>
-          <li>Proyecto Y - Pendiente</li>
-        </ul>
-      </div>
-    </Layout>
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">
+        Proyectos asignados
+      </h1>
+
+      <ul className="list-disc ml-6">
+        {proyectos.map((p, i) => (
+          <li key={i}>{p}</li>
+        ))}
+      </ul>
+    </div>
   );
 }

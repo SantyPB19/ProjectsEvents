@@ -1,92 +1,81 @@
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { AuthCard } from "@/components/auth/auth-card";
-import { AuthFormInput } from "@/components/auth/auth-form-input";
-import { Button } from "@/components/ui/button";
-import { FieldGroup } from "@/components/ui/field";
-import { validateEmail } from "@/lib/validaciones";
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { AuthCard } from "@/components/auth/auth-card"
+import { AuthFormInput } from "@/components/auth/auth-form-input"
+import { Button } from "@/components/ui/button"
+import { FieldGroup } from "@/components/ui/field"
+import { validateEmail } from "@/lib/validaciones"
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [serverMessage, setServerMessage] = useState<{
-    text: string;
-    type: "success" | "error";
-  } | null>(null);
+    text: string
+    type: "success" | "error"
+  } | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const [isLoading, setIsLoading] = useState(false);
+  const emailError = validateEmail(email)
+  const passwordError = password.length > 0 && password.length < 8 ? "Mínimo 8 caracteres" : ""
+  const hasErrors = !!emailError || !!passwordError || !email || !password
 
-  const emailError = validateEmail(email);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (hasErrors) return;
 
-  const passwordError =
-    password.length > 0 && password.length < 8
-      ? "Mínimo 8 caracteres"
-      : "";
+  setIsLoading(true);
+  setServerMessage(null);
 
-  const hasErrors = !!emailError || !!passwordError || !email || !password;
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const data = await response.json();
 
-    if (hasErrors) return;
-
-    setIsLoading(true);
-    setServerMessage(null);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setServerMessage({
-          text: "¡Bienvenido! Iniciando sesión...",
-          type: "success",
-        });
-
-        const role = data.user?.role;
-
-        setTimeout(() => {
-          if (role === "admin") {
-            router.push("/dashboard/admin");
-          } else if (role === "solicitante") {
-            router.push("/dashboard/solicitante");
-          } else if (role === "colaborador") {
-            router.push("/dashboard/colaborador");
-          } else {
-            router.push("/login");
-          }
-        }, 1500);
-
-      } else {
-        setServerMessage({
-          text: data.message || "Credenciales incorrectas",
-          type: "error",
-        });
-      }
-
-    } catch (error: unknown) {
-
-      // ✅ FIX SONARQUBE
-      console.error("Error en login:", error);
+    if (response.ok) {
+      // ❌ NO guardar cookie aquí (backend ya lo hace)
 
       setServerMessage({
-        text: "No se pudo conectar con el servidor. Intenta más tarde.",
-        type: "error",
+        text: "¡Bienvenido! Iniciando sesión...",
+        type: "success",
       });
 
-    } finally {
-      setIsLoading(false);
+      const role = data.user?.role;
+
+      setTimeout(() => {
+        if (role === "admin") {
+          router.push("/dashboard/admin");
+        } else if (role === "solicitante") {
+          router.push("/dashboard/solicitante");
+        } else if (role === "colaborador") {
+          router.push("/dashboard/colaborador");
+        } else {
+          router.push("/dashboard");
+        }
+      }, 1000);
+    } else {
+      setServerMessage({
+        text: data.message || "Credenciales incorrectas",
+        type: "error",
+      });
     }
-  };
+  } catch (error) {
+    setServerMessage({
+      text: "No se pudo conectar con el servidor",
+      type: "error",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
@@ -98,7 +87,7 @@ export default function LoginPage() {
           <FieldGroup>
             <AuthFormInput
               id="email"
-              label="Correo electrónico"
+              label="Correo electronico"
               type="email"
               placeholder="tu@email.com"
               autoComplete="email"
@@ -106,10 +95,9 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               error={email ? emailError : ""}
             />
-
             <AuthFormInput
               id="password"
-              label="Contraseña"
+              label="Contrasena"
               type="password"
               placeholder="********"
               autoComplete="current-password"
@@ -138,14 +126,13 @@ export default function LoginPage() {
               className="w-full"
               disabled={hasErrors || isLoading}
             >
-              {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+              {isLoading ? "Iniciando sesión..." : "Iniciar sesion"}
             </Button>
-
             <Link
               href="/recuperar"
               className="text-center text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              ¿Olvidaste tu contraseña?
+              Olvidaste tu contrasena?
             </Link>
           </div>
 
@@ -153,10 +140,9 @@ export default function LoginPage() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
-
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
-                ¿No tienes cuenta?
+                No tienes cuenta?
               </span>
             </div>
           </div>
@@ -169,5 +155,5 @@ export default function LoginPage() {
         </form>
       </AuthCard>
     </main>
-  );
+  )
 }

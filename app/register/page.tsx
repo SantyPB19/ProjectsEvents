@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { AuthFormInput } from "@/components/auth/auth-form-input";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+
 import {
   validateName,
   validateEmail,
@@ -35,6 +37,7 @@ export default function RegisterPage() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Validación en tiempo real
   useEffect(() => {
     setErrors({
       name: validateName(name),
@@ -48,7 +51,6 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (hasErrors) return;
 
     setIsLoading(true);
@@ -68,29 +70,18 @@ export default function RegisterPage() {
           text: "Registro exitoso. Por favor inicia sesión.",
           type: "success",
         });
-
         setTimeout(() => router.push("/login"), 3000);
-
       } else {
         setServerMessage({
-          text:
-            data.message ||
-            data.detail ||
-            "Error al registrar. Intenta de nuevo.",
+          text: data.message || data.detail || "Error al registrar. Intenta de nuevo.",
           type: "error",
         });
       }
-
-    } catch (error: unknown) {
-
-      // ✅ FIX SONARQUBE
-      console.error("Error en registro:", error);
-
+    } catch (error) {
       setServerMessage({
         text: "No se pudo conectar con el servidor. Intenta más tarde.",
         type: "error",
       });
-
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +103,6 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               error={errors.name}
             />
-
             <AuthFormInput
               id="email"
               label="Correo electronico"
@@ -121,7 +111,6 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               error={errors.email}
             />
-
             <AuthFormInput
               id="password"
               label="Contrasena"
@@ -130,7 +119,6 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
             />
-
             <AuthFormInput
               id="confirmPassword"
               label="Confirmar contrasena"
@@ -150,7 +138,6 @@ export default function RegisterPage() {
               }`}
             >
               {serverMessage.text}
-
               {serverMessage.type === "success" && (
                 <p className="text-xs mt-1 text-green-600">
                   Redirigiendo al login en 3 segundos...
@@ -174,7 +161,6 @@ export default function RegisterPage() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
-
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
                 Ya tienes cuenta?

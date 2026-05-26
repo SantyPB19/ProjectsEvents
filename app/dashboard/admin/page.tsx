@@ -1,27 +1,35 @@
-import Layout from "@/components/dashboard/layout";
+"use client";
 
 export default function AdminDashboard() {
+  const proyectosPendientes = [
+    "Proyecto A",
+    "Proyecto B",
+    "Proyecto C",
+  ];
+
   return (
-    <Layout>
-      <h1 className="text-3xl font-bold mb-6">Resumen</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Panel Administrador</h1>
 
       {/* Resumen */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded shadow">Usuarios: 12</div>
-        <div className="bg-white p-4 rounded shadow">Proyectos Activos: 8</div>
-        <div className="bg-white p-4 rounded shadow">Proyectos Pendientes: 4</div>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Resumen general</h2>
+        <p>Total proyectos: 10</p>
+        <p>Usuarios registrados: 5</p>
       </div>
 
-      {/* Pendientes */}
-      <div className="bg-white p-4 rounded shadow">
-        <h2 className="text-xl mb-4">Proyectos pendientes</h2>
-        <ul>
-          <li>Proyecto A</li>
-          <li>Proyecto B</li>
-          <li>Proyecto C</li>
-          <li>Proyecto D</li>
+      {/* Proyectos pendientes */}
+      <div>
+        <h2 className="text-xl font-semibold mb-2">
+          Proyectos pendientes
+        </h2>
+
+        <ul className="list-disc ml-6">
+          {proyectosPendientes.map((p, i) => (
+            <li key={i}>{p}</li>
+          ))}
         </ul>
       </div>
-    </Layout>
+    </div>
   );
 }
