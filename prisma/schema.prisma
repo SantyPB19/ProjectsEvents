@@ -11,12 +11,11 @@ model User {
   name                 String
   email                String    @unique
   password             String
-  role      String   @default("user")
+  role                 String    @default("solicitante")
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
-
 
   @@map("users")
 }
